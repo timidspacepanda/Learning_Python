@@ -9,7 +9,8 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "args": ["--sheetpath", "C:/Users/iamky/OneDrive/01_Finances/short-term-purchase-summer_2025.xlsx"]
         }
     ]
 }
