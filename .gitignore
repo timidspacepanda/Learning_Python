@@ -1,0 +1,24 @@
+# Ignore Python cache and virtual env
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+.venv/
+venv/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# VS Code settings
+.vscode/
+
+# Ignore compiled binaries
+*.exe
+*.dll
+*.o
+*.so
+
+# Ignore logs and temporary files
+*.logs
+*.tmp
