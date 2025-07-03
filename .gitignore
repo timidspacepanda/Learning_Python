@@ -22,3 +22,6 @@ Thumbs.db
 # Ignore logs and temporary files
 *.logs
 *.tmp
+
+# Ignore project specific files and folders
+data/
