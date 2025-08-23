@@ -6,6 +6,10 @@ __pycache__/
 .venv/
 venv/
 
+# Ignore all CSV and XLSX files
+*.csv
+*.xlsx
+
 # Ignore OS-specific files
 .DS_Store
 Thumbs.db
