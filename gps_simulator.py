@@ -1,5 +1,8 @@
 import math
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.collections import LineCollection
+from matplotlib.ticker import FuncFormatter
 
 class GPS_Simulator:
     def __init__(self, lat, lon):
@@ -100,22 +103,72 @@ class GPS_Simulator:
             current_time += dt
         return results
 
-    def track_plot(self, results):
+    def track_plot(self, results, cmap='viridis'):
         """
-        Plot lat vs lon from simulation results.
-        Input: results = list of (time, lat, lon)
+        Plot lat vs lon with color gradient from start to end
+        results: list of (time, lat, lon)
+        cmap: any matplotlib colormap name (e.g. 'viridis', 'plasma', 'jet')
         """
 
+        # Extract lat/lon
         lats = [r[1] for r in results]
         lons = [r[2] for r in results]
 
-        plt.figure(figsize=(6,6))
-        plt.plot(lons, lats, marker='o', markersize=3)
-        plt.xlabel('Longitude')
-        plt.ylabel('Latitude')
-        plt.title('Simulated GPS Track')
+        # Create line segments
+        points = np.array([lons, lats]).T.reshape(-1, 1, 2)
+        segments = np.hstack([points[:-1], points[1:]])
+
+        # Normalize time values 0 -> 1
+        times = np.array([r[0] for r in results])
+        norm = (times - times.min()) / (times.max() - times.min())
+
+        # Create color-graded line collection
+        lc = LineCollection(
+                            segments,
+                            cmap=cmap,
+                            array=norm,
+                            linewidths=3
+                            )
+
+        fig, ax = plt.subplots(figsize=(6,6))
+        ax.add_collection(lc)
+
+        # ----- Human-readable lat/lon formatting -----
+        def format_lon(x, pos):
+            """Format longitude with E/W suffix"""
+            direction = 'E' if x >= 0 else 'W'
+            return f"{abs(x):.5f}deg{direction}"
+
+        def format_lat(x, pos):
+            """Format latitude with N/S suffix"""
+            direction = 'N' if x >= 0 else 'S'
+            return f"{abs(x):.5f}deg{direction}"
+
+        ax.xaxis.set_major_formatter(FuncFormatter(format_lon))
+        ax.yaxis.set_major_formatter(FuncFormatter(format_lat))
+
+        # Clean tick layout
+        ax.set_xticks(np.linspace(min(lons), max(lons), 6))
+        ax.set_yticks(np.linspace(min(lats), max(lats), 6))
+
+        # Rotate X tick labels to 45
+        plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
+
+        # ---------------------------------------------
+
+
+        ax.set_xlabel("Longitude")
+        ax.set_ylabel("Latitude")
+        ax.set_title("Simulated GPS Track (Color-graded Start-End)")
         plt.grid(True)
         plt.axis("equal") # keep scale accurate
+
+
+        # Add colorbar
+        cbar = fig.colorbar(lc, ax=ax)
+        cbar.set_label("Simulation Time (normalized)")
+
+        plt.tight_layout()
         plt.show()
 
 if __name__ == "__main__":
