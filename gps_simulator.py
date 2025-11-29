@@ -52,6 +52,79 @@ class GPS_Simulator:
         # Ensure maneuvers are sorted by time
         self.maneuvers.sort(key=lambda x: x[0])
 
+    def add_turn_maneuver(self, turn_time, turn_rate, turn_speed=None, turn_speed_unit='m/s', heading=None):
+        """
+        Schedule a turn maneuver at a given time (seconds). Method shall generate increment maneuvers based on
+        turn_rate and turn_speed.
+
+        Args:
+            turn_time: Simulation time in seconds when turn is initiated.
+            turn_rate: Rate of turn in degrees per second.
+            turn_speed: default speed of turn in m/s.
+            turn_speed_unit: optional units: 'm/s', 'kph', 'mph', 'knots', 'ft/s'
+            heading: target heading at end of turn (degrees)
+        """
+        speed_m_s = None
+        if turn_speed is not None:
+            speed_m_s = self._convert_to_mps(turn_speed, turn_speed_unit)
+        else:
+            speed_m_s = self.current_speed
+
+        # Check if turn_time not already in maneuver list. Throw error if maneuver time exists
+        if any(maneuvers[0] == turn_time for maneuvers in self.maneuvers):
+            raise ValueError(f"Tuple with first element {turn_time} already exists in the list")
+
+        # Get last heading from maneuver list before 'this' maneuver.
+
+        # Based on turn_rate, determine heading & time increments to complete method request.
+        incre_headings = self.__incremental_heading_change_handler(self.current_heading,
+                                                                   heading,
+                                                                   turn_rate)
+        incre_headings = list(incre_headings)
+
+        # Create list of maneuver increment tuples
+        turn_maneuver_list = [ (i, speed_m_s, incre_headings[i]) for i in range(len(incre_headings)) ]
+
+        # Append turn maneuver list to self.maneuver list
+        [ self.maneuvers.append(turn_maneuver) for turn_maneuver in turn_maneuver_list ]
+        # Ensure maneuvers are sorted by time
+        self.maneuvers.sort(key=lambda x: x[0])
+
+    @staticmethod
+    def __incremental_heading_change_handler(current, target, turn_rate):
+        # Normalize headings to [0, 360]
+        h0 = current % 360
+        h1 = target % 360
+
+        # Compute shortest angular difference (signed)
+        diff = ((h1 - h0 + 540) % 360) - 180
+        # diff > 0 --> turn CCW
+        # diff < 0 --> turn CW
+
+        if diff == 0:
+            return [h0] # Already at target
+
+        # Determine turn direction
+        direction = 1 if  diff > 0 else -1
+
+        # How many seconds to reach target?
+        total_turn = abs(diff)
+        seconds = int(total_turn / turn_rate)
+
+        # Generate headings
+        headings = []
+        current = h0
+
+        for _ in range(seconds):
+            current = (current + direction * turn_rate) % 360
+            headings.append(current)
+
+        # Add the exact target heading at the end
+        if headings == [] or headings[-1] != h1:
+            headings.append(h1)
+
+        return headings
+
     def __apply_maneuvers(self, current_time):
         """
         Apply maneuvers scheduled at the current time.
