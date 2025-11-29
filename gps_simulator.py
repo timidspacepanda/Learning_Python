@@ -113,20 +113,21 @@ class GPS_Simulator:
         # Extract lat/lon
         lats = [r[1] for r in results]
         lons = [r[2] for r in results]
+        times = np.array([r[0] for r in results])
 
         # Create line segments
         points = np.array([lons, lats]).T.reshape(-1, 1, 2)
         segments = np.hstack([points[:-1], points[1:]])
 
         # Normalize time values 0 -> 1
-        times = np.array([r[0] for r in results])
-        norm = (times - times.min()) / (times.max() - times.min())
+        #norm = (times - times.min()) / (times.max() - times.min())
 
         # Create color-graded line collection
         lc = LineCollection(
                             segments,
                             cmap=cmap,
-                            array=norm,
+                            #array=norm,
+                            array=times,
                             linewidths=3
                             )
 
@@ -166,7 +167,10 @@ class GPS_Simulator:
 
         # Add colorbar
         cbar = fig.colorbar(lc, ax=ax)
-        cbar.set_label("Simulation Time (normalized)")
+        cbar.set_label("Simulation Time (s)")
+        cbar.set_ticks([times[0], times[-1]])
+        cbar.set_ticklabels([f"{times[0]:.0f}s", f"{times[-1]:.0f}s"])
+
 
         plt.tight_layout()
         plt.show()
