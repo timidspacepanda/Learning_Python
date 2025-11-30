@@ -8,28 +8,18 @@ sim.current_heading = 90 # degrees
 # Schedule maneuvers
 sim.add_maneuver(time=3, heading=45) # turn NE at t=3s
 sim.add_maneuver(time=6, speed=5, speed_unit='knots') # slow down at t=6s
-sim.add_maneuver(time=8, speed=15, speed_unit='knots')
-sim.add_maneuver(time=9, speed=20, speed_unit='knots', heading=48)
-sim.add_maneuver(time=15, speed=25, speed_unit='knots')
-sim.add_maneuver(time=20, speed=20, speed_unit='knots')
-sim.add_maneuver(time=35, speed=10, speed_unit='knots', heading=50)
-sim.add_maneuver(time=45, speed=2, speed_unit='knots', heading=55)
-sim.add_maneuver(time=60, speed=30, speed_unit='knots', heading=60)
-sim.add_maneuver(time=65, speed=15, speed_unit='knots', heading=65)
-sim.add_maneuver(time=70, speed=10, speed_unit='knots', heading=70)
-sim.add_maneuver(time=75, speed=5, speed_unit='knots', heading=85)
-sim.add_maneuver(time=80, speed=5, speed_unit='knots', heading=90)
-sim.add_maneuver(time=90, speed=5, speed_unit='knots', heading=100)
-sim.add_maneuver(time=100, speed=3, speed_unit='knots', heading=120)
-sim.add_maneuver(time=108, speed=15, speed_unit='knots')
-sim.add_maneuver(time=115, speed=20, speed_unit='knots')
-sim.add_maneuver(time=120, speed=30, speed_unit='knots')
-sim.add_turn_maneuver(turn_time=150, turn_rate=3, turn_speed=15, turn_speed_unit='knots', heading=135)
+sim.add_maneuver(time=10, speed=20, speed_unit='knots')
+sim.add_turn_maneuver(turn_time=15, turn_rate=3, turn_speed=15, turn_speed_unit='knots', heading=135)
+sim.add_maneuver(time=90, speed=20, speed_unit='knots')
+sim.add_turn_maneuver(turn_time=110, turn_rate=1, turn_speed=5, turn_speed_unit='knots', heading=225)
+sim.add_maneuver(time=210, speed=15, speed_unit='knots')
+sim.add_maneuver(time=220, speed=20, speed_unit='knots')
+sim.add_maneuver(time=230, speed=30, speed_unit='knots')
 
+# Run simulation for x number of seconds
+trajectory = sim.simulate(end_time=500)
 
-# Run simulation for 10 seconds
-trajectory = sim.simulate(end_time=200)
-
+# Display simulated track
 for t, lat, lon in trajectory:
     print(f"t={t:.0f}s -> lat={lat:.6f}, lon={lon:.6f}")
 

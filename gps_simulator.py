@@ -16,6 +16,10 @@ class GPS_Simulator:
         self.current_heading = 0
         self.maneuvers = [] # List of (time, new_speed, new_heading)
 
+        # Initial spead and heading set to zero.
+        self.add_maneuver(time=0, speed=0, speed_unit='m/s',
+                          heading=0)
+
     @staticmethod
     def _convert_to_mps(speed, unit):
         """
@@ -36,6 +40,12 @@ class GPS_Simulator:
         else:
             raise ValueError(f"Unsupported unit: '{unit}'")
 
+    def __ensure_timestamp_not_exists(self, next_timestamp_candidate):
+        """Private helper: raises ValueError if timestamp does not exist in maneuvers list."""
+        for tstamp in self.maneuvers:
+            if tstamp[0] == next_timestamp_candidate:
+                raise ValueError(f"Maneuver with timestamp '{next_timestamp_candidate}' already exists.")
+
 
     def add_maneuver(self, time, speed=None, speed_unit='m/s', heading=None):
         """
@@ -47,6 +57,20 @@ class GPS_Simulator:
         speed_m_s = None
         if speed is not None:
             speed_m_s = self._convert_to_mps(speed, speed_unit)
+        else:
+            try:
+                speed_m_s = self.maneuvers[-1][1] # if speed not given, set previous maneuver speed.
+            except IndexError:
+                speed_m_s = 0
+
+        if heading is None:
+            try:
+                heading = self.maneuvers[-1][2] # if heading not given, set previous maneuver heading.
+            except IndexError:
+                heading = 0
+
+        # check if candidate maneuver timestamp not already in maneuver list.
+        self.__ensure_timestamp_not_exists(time)
 
         self.maneuvers.append((time, speed_m_s, heading))
         # Ensure maneuvers are sorted by time
@@ -75,15 +99,19 @@ class GPS_Simulator:
             raise ValueError(f"Tuple with first element {turn_time} already exists in the list")
 
         # Get last heading from maneuver list before 'this' maneuver.
+        last_heading_maneuver = self.maneuvers[-1][2]
 
         # Based on turn_rate, determine heading & time increments to complete method request.
-        incre_headings = self.__incremental_heading_change_handler(self.current_heading,
+        incre_headings = self.__incremental_heading_change_handler(last_heading_maneuver,
                                                                    heading,
                                                                    turn_rate)
         incre_headings = list(incre_headings)
 
         # Create list of maneuver increment tuples
-        turn_maneuver_list = [ (i, speed_m_s, incre_headings[i]) for i in range(len(incre_headings)) ]
+        turn_maneuver_list = [ (turn_time + i, speed_m_s, incre_headings[i]) for i in range(len(incre_headings)) ]
+
+        # check if candidate maneuver timestamp not already in maneuver list.
+        [ self.__ensure_timestamp_not_exists(turn_tup[0]) for turn_tup in turn_maneuver_list ]
 
         # Append turn maneuver list to self.maneuver list
         [ self.maneuvers.append(turn_maneuver) for turn_maneuver in turn_maneuver_list ]
