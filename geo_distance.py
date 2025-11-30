@@ -61,11 +61,38 @@ class GeoDistance:
         lat2, lon2 = point2
         return self.haversine(lat1, lon1, lat2, lon2, unit)
 
+    def distance_traveled(self, coordinates_list, dist_unit='km'):
+        # Sum up distances between segment coordinates
+        LAT_INDEX = 0
+        LON_INDEX = 1
+        segment_distances = []
+        for idx in range(len(coordinates_list)):
+            if idx == 0:
+                continue # skip first element
+            else:
+                seg_start_pos = (
+                    coordinates_list[idx - 1][LAT_INDEX],
+                    coordinates_list[idx - 1][LON_INDEX]
+                )
+
+                seg_end_pos = (
+                    coordinates_list[idx][LAT_INDEX],
+                    coordinates_list[idx][LON_INDEX]
+                )
+
+                segment_distances.append(self.haversine_points(
+                    seg_start_pos, seg_end_pos, unit=dist_unit
+                ))
+
+        # Print out sum of segment distances
+        total_dist_traveled = sum(segment_distances)
+        print(f"Total Distance Traveled: {total_dist_traveled:0.2f} {dist_unit}")
+        return total_dist_traveled
+
     def __convert_unit(self, distance_km, unit):
         """
         Private method to convert distance in kilometers to other units.
         """
-
         unit = unit.lower()
         if unit == 'km':
             return distance_km

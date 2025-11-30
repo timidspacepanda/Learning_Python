@@ -15,9 +15,20 @@ sim.add_turn_maneuver(turn_time=110, turn_rate=1, turn_speed=5, turn_speed_unit=
 sim.add_maneuver(time=210, speed=15, speed_unit='knots')
 sim.add_maneuver(time=220, speed=20, speed_unit='knots')
 sim.add_maneuver(time=230, speed=30, speed_unit='knots')
+sim.add_turn_maneuver(turn_time=300, turn_rate=1, turn_speed=15, turn_speed_unit='knots', heading=285)
+sim.add_maneuver(time=400, speed=15, speed_unit='knots')
+sim.add_maneuver(time=405, speed=20, speed_unit='knots')
+sim.add_maneuver(time=410, speed=30, speed_unit='knots')
+sim.add_turn_maneuver(turn_time=500, turn_rate=1, turn_speed=15, turn_speed_unit='knots', heading=325)
+sim.add_maneuver(time=545, speed=15, speed_unit='knots')
+sim.add_maneuver(time=550, speed=20, speed_unit='knots')
+sim.add_maneuver(time=555, speed=30, speed_unit='knots')
+
+# Display maneuvers
+sim.list_maneuvers()
 
 # Run simulation for x number of seconds
-trajectory = sim.simulate(end_time=500)
+trajectory = sim.simulate(end_time=600)
 
 # Display simulated track
 for t, lat, lon in trajectory:
@@ -26,10 +37,13 @@ for t, lat, lon in trajectory:
 # Use GeoDistance to find distance from start and end points of simulation.
 geo = GeoDistance()
 
+# P2P Distance between first and last track coordinates.
 start_pos = (trajectory[0][1], trajectory[0][2])
 end_pos = (trajectory[-1][1], trajectory[-1][2])
+print(f"P2P Distance (nmi): {geo.haversine_points(start_pos, end_pos, unit='nmi'):.2f} nmi")
 
-print(f"Distance (nmi): {geo.haversine_points(start_pos, end_pos):.2f} nmi")
+trajectory_coordinates = [ data[1:] for data in trajectory ] # Strip out sim time element.
+geo.distance_traveled(trajectory_coordinates, dist_unit='nmi')
 
 # Plot simulated track
 sim.track_plot(trajectory)
