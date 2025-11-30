@@ -204,6 +204,23 @@ class GPS_Simulator:
             current_time += dt
         return results
 
+    def list_maneuvers(self):
+        text = "Maneuvers List"
+        border = "-" * (len(text) + 4)
+        print(border)
+        print(f"| {text} |")
+        print(border)
+        for time, vel, hdg in self.maneuvers:
+            print(f"t={time:.0f}s -> vel_m_s={vel:.3f}, hdg_deg={hdg:.3f}")
+
+        text = "End of Maneuvers List"
+        border = "-" * (len(text) + 4)
+        print(border)
+        print(f"| {text} |")
+        print(border+"\n")
+
+
+
     def track_plot(self, results, cmap='viridis'):
         """
         Plot lat vs lon with color gradient from start to end
